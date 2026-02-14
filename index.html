@@ -378,31 +378,34 @@
       }
 
       // STEP 4: Q3 — be my valentine (No runs away)
-      if (step === 4){
-        animateQuestion("Будешь моей валентинкой? 🥺💘", () => {
-          // YES button is normal
-          const yes = document.createElement("button");
-          yes.className = "btn-yes";
-          yes.textContent = "ДА, КОНЕЧНО! 💞";
-          yes.onclick = () => { step = 5; render(); };
+    if (step === 4){
+  animateQuestion("Будешь моей валентинкой? 🥺💘", () => {
 
-          // NO button runs away
-          const no = document.createElement("button");
-          no.className = "btn-no runaway";
-          no.id = "noRunaway";
-          no.textContent = "Нет";
-          // move away on hover/touch/click
-          no.onmouseenter = moveRunawayNo;
-          no.ontouchstart = (e) => { e.preventDefault(); moveRunawayNo(); };
-          no.onclick = (e) => { e.preventDefault(); moveRunawayNo(); };
+    // YES button
+    const yes = document.createElement("button");
+    yes.className = "btn-yes";
+    yes.textContent = "ДА, КОНЕЧНО! 💞";
+    yes.onclick = () => { step = 5; render(); };
 
-          btnsEl.appendChild(yes);
-          btnsEl.appendChild(no);
+    // NO button runs away
+    const no = document.createElement("button");
+    no.className = "btn-no runaway";
+    no.id = "noRunaway";
+    no.textContent = "Нет";
 
-          // initial nudge so it doesn't sit still
-          setTimeout(moveRunawayNo, 300);
+    no.onmouseenter = moveRunawayNo;
+    no.ontouchstart = (e) => { e.preventDefault(); moveRunawayNo(); };
+    no.onclick = (e) => { e.preventDefault(); moveRunawayNo(); };
 
-      // STEP 5: Final message (your exact text)
+    btnsEl.appendChild(yes);
+    btnsEl.appendChild(no);
+
+    setTimeout(moveRunawayNo, 300);
+
+  });      // ← closes animateQuestion
+  return;
+}          // ← closes step 4
+
       if (step === 5){
         animateQuestion(
           `<span class="success">✅ Операция одобрена! <span class="sparkle">✨</span></span><br><br>` +
@@ -474,6 +477,7 @@
   </script>
 </body>
 </html>
+
 
 
 
