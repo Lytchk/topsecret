@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Quick Survey</title>
+
+  <style>
+    :root{
+      --pink1:#ff77b7;
+      --pink2:#ffd1e8;
+      --card:#ffffffee;
+      --text:#3b0a2a;
+      --accent:#ff2f92;
+      --shadow: 0 14px 40px rgba(0,0,0,.12);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, #fff2f8 0%, transparent 55%),
+                  radial-gradient(900px 600px at 85% 20%, #ffe6f2 0%, transparent 60%),
+                  linear-gradient(135deg, var(--pink1), var(--pink2));
+      color:var(--text);
+      overflow:hidden;
+      text-align:center;
+    }
+
+    /* Floating hearts background (light) */
+    .bg-heart{
+      position:fixed;
+      font-size:18px;
+      opacity:.16;
+      animation: floatUp 10s linear infinite;
+      pointer-events:none;
+      filter: blur(.2px);
+    }
+    @keyframes floatUp{
+      from{ transform:translateY(20vh) translateX(0) rotate(0deg); }
+      to  { transform:translateY(-120vh) translateX(40px) rotate(18deg); }
+    }
+
+    .flowers{
+      position:fixed;
+      top:14px;
+      right:16px;
+      font-size:22px;
+      user-select:none;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.15));
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1); opacity:.95}
+      50%{transform:scale(1.08); opacity:1}
+    }
+
+    .card{
+      width:min(560px, 92vw);
+      background:var(--card);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding:22px 18px;
+      position:relative;
+      backdrop-filter: blur(6px);
+    }
+
+    .title{
+      font-weight:800;
+      font-size:20px;
+      letter-spacing:.2px;
+      margin:6px 0 10px;
+      color:var(--accent);
+    }
+
+    #screen{
+      padding:6px 6px 2px;
+      line-height:1.35;
+      min-height:140px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:10px;
+    }
+
+    #question{
+      font-size:18px;
+      margin:0;
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .fade-out{opacity:0; transform:translateY(6px)}
+    .fade-in{opacity:1; transform:translateY(0)}
+
+    .buttons{
+      margin-top:8px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      padding:12px 16px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:15px;
+      transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.10);
+    }
+    button:active{ transform:scale(.98) }
+    button:hover{ filter:brightness(1.03) }
+
+    .btn-yes{
+      background: linear-gradient(135deg, #ff2f92, #ff79bb);
+      color:white;
+    }
+    .btn-no{
+      background: #ffe0ef;
+      color:#7a1a4d;
+    }
+
+    button:disabled{
+      opacity:.35;
+      cursor:not-allowed;
+      box-shadow:none;
+      transform:none !important;
+    }
+
+    /* Envelope */
+    .envelope-wrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      margin-top:8px;
+    }
+    .envelope{
+      width:170px;
+      height:120px;
+      border-radius:18px;
+      background: linear-gradient(135deg, #fff, #ffe6f2);
+      position:relative;
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,47,146,.18);
+      overflow:hidden;
+      cursor:pointer;
+      transition: transform 180ms ease;
+    }
+    .envelope:hover{ transform: translateY(-2px) }
+    .env-flap{
+      position:absolute;
+      left:0; right:0;
+      top:-22px;
+      margin:auto;
+      width:0; height:0;
+      border-left: 85px solid transparent;
+      border-right:85px solid transparent;
+      border-bottom: 70px solid #ffd3e8;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.08));
+    }
+    .env-body{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:68px;
+      background: #fff;
+      border-top: 2px solid rgba(255,47,146,.10);
+    }
+    .seal{
+      position:absolute;
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, #ff95c9, #ff2f92);
+      left:0; right:0;
+      top:56px;
+      margin:auto;
+      box-shadow: 0 10px 14px rgba(255,47,146,.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:900;
+      font-size:14px;
+    }
+    .hint{
+      font-size:13px;
+      opacity:.75;
+      margin:0;
+    }
+
+    /* Runaway NO button (Q3) */
+    .runaway{
+      position:fixed;
+      z-index:9999;
+      transition: left 220ms ease, top 220ms ease, transform 220ms ease;
+      will-change: left, top, transform;
+    }
+    .runaway.escape{ transform: rotate(-7deg) scale(1.03); }
+
+    /* Success confetti-ish pulse */
+    .success{
+      font-size:18px;
+    }
+    .sparkle{
+      display:inline-block;
+      animation: sparkle 900ms ease-in-out infinite;
+    }
+    @keyframes sparkle{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-2px)}
+    }
+  </style>
+</head>
+
+<body>
+  <!-- light floating hearts -->
+  <div class="bg-heart" style="left:8%;  bottom:-10vh; animation-duration:12s;">💗</div>
+  <div class="bg-heart" style="left:22%; bottom:-18vh; animation-duration:10s;">💞</div>
+  <div class="bg-heart" style="left:45%; bottom:-14vh; animation-duration:14s;">💖</div>
+  <div class="bg-heart" style="left:68%; bottom:-20vh; animation-duration:11s;">💗</div>
+  <div class="bg-heart" style="left:86%; bottom:-16vh; animation-duration:13s;">💕</div>
+
+  <div class="flowers" id="flowersDisplay">🌸 🌸 🌸</div>
+
+  <div class="card">
+    <div class="title">✦ Secure Cute Protocol ✦</div>
+
+    <div id="screen">
+      <p id="question">Загрузка… 💞</p>
+      <div class="buttons" id="buttons"></div>
+
+      <!-- Envelope screen container (we show/hide via JS) -->
+      <div class="envelope-wrap" id="envelopeWrap" style="display:none;">
+        <div class="envelope" id="envelopeBtn" title="Открыть">
+          <div class="env-flap"></div>
+          <div class="env-body"></div>
+          <div class="seal">♡</div>
+        </div>
+        <p class="hint">Нажми на конверт, чтобы открыть 💌</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------------
+    // State
+    // ----------------------------
+    let step = 0;
+    let flowers = 3;
+
+    // disable "Нет" after one use on Q1 and Q2
+    let q1NoUsed = false;
+    let q2NoUsed = false;
+
+    const qEl = document.getElementById("question");
+    const btnsEl = document.getElementById("buttons");
+    const flowersEl = document.getElementById("flowersDisplay");
+    const envelopeWrap = document.getElementById("envelopeWrap");
+    const envelopeBtn = document.getElementById("envelopeBtn");
+
+    function updateFlowers(){
+      flowersEl.textContent = "🌸 ".repeat(flowers).trim();
+    }
+
+    function animateQuestion(html, renderButtonsFn){
+      qEl.classList.add("fade-out");
+      setTimeout(() => {
+        qEl.innerHTML = html;
+        qEl.classList.remove("fade-out");
+        qEl.classList.add("fade-in");
+        btnsEl.innerHTML = "";
+        if (typeof renderButtonsFn === "function") renderButtonsFn();
+        setTimeout(() => qEl.classList.remove("fade-in"), 240);
+      }, 220);
+    }
+
+    function loseFlower(){
+      flowers--;
+      if (flowers < 0) flowers = 0;
+      updateFlowers();
+      if (flowers === 0){
+        animateQuestion("🥺 Ой… цветочки закончились…<br><b>Доступ временно заблокирован</b> 🚫", () => {
+          btnsEl.innerHTML = "";
+          envelopeWrap.style.display = "none";
+        });
+        return true; // locked
+      }
+      return false;
+    }
+
+    // ----------------------------
+    // Runaway NO for question 3
+    // ----------------------------
+    function moveRunawayNo(){
+      const noBtn = document.getElementById("noRunaway");
+      if (!noBtn) return;
+
+      noBtn.classList.add("runaway");
+
+      const pad = 14;
+      const w = noBtn.offsetWidth || 140;
+      const h = noBtn.offsetHeight || 52;
+
+      const maxX = window.innerWidth - w - pad;
+      const maxY = window.innerHeight - h - pad;
+
+      const x = Math.max(pad, Math.random() * maxX);
+      const y = Math.max(pad, Math.random() * maxY);
+
+      noBtn.classList.add("escape");
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+      setTimeout(() => noBtn.classList.remove("escape"), 220);
+    }
+
+    // ----------------------------
+    // Flow Screens
+    // ----------------------------
+
+    function render(){
+      envelopeWrap.style.display = "none";
+      btnsEl.innerHTML = "";
+
+      // STEP 0: Disclaimer
+      if (step === 0){
+        animateQuestion(
+          "⚠️ <b>ВНИМАНИЕ</b> ⚠️<br><br>" +
+          "Если вы пройдёте этот тест…<br>" +
+          "уровень <b>дофамина</b> и <b>серотонина</b> может <b>ЗАШКАЛИВАТЬ</b> 😳💘<br><br>" +
+          "Каждый ответ «Нет» = минус один 🌸<br>" +
+          "У вас всего <b>3</b> 🌸",
+          () => {
+            btnsEl.innerHTML =
+              `<button class="btn-yes" onclick="step=1; render()">Поняла 🙂</button>`;
+          }
+        );
+        return;
+      }
+
+      // STEP 1: Envelope
+      if (step === 1){
+        animateQuestion("Обнаружено секретное сообщение… 💌<br><b>Открыть?</b> 👀", () => {
+          btnsEl.innerHTML = "";
+          envelopeWrap.style.display = "flex";
+        });
+
+        envelopeBtn.onclick = () => {
+          step = 2;
+          render();
+        };
+        return;
+      }
+
+      // STEP 2: Q1 — Привет
+      if (step === 2){
+        animateQuestion("Привет 😊", () => {
+          btnsEl.innerHTML =
+            `<button class="btn-yes" onclick="step=3; render()">Привет 💗</button>` +
+            `<button class="btn-no" ${q1NoUsed ? "disabled" : ""} onclick="q1No()">Нет</button>`;
+        });
+        return;
+      }
+
+      // STEP 3: Q2 — планы на 14 февраля
+      if (step === 3){
+        animateQuestion("Какие планы на <b>14 февраля</b>? 👉🏻👈🏻", () => {
+          btnsEl.innerHTML =
+            `<button class="btn-yes" onclick="q2Yes()">Не занята 😌</button>` +
+            `<button class="btn-no" ${q2NoUsed ? "disabled" : ""} onclick="q2No()">Нет</button>`;
+        });
+        return;
+      }
+
+      // STEP 4: Q3 — be my valentine (No runs away)
+      if (step === 4){
+        animateQuestion("Будешь моей валентинкой? 🥺💘", () => {
+          // YES button is normal
+          const yes = document.createElement("button");
+          yes.className = "btn-yes";
+          yes.textContent = "ДА, КОНЕЧНО! 💞";
+          yes.onclick = () => { step = 5; render(); };
+
+          // NO button runs away
+          const no = document.createElement("button");
+          no.className = "btn-no runaway";
+          no.id = "noRunaway";
+          no.textContent = "Нет";
+          // move away on hover/touch/click
+          no.onmouseenter = moveRunawayNo;
+          no.ontouchstart = (e) => { e.preventDefault(); moveRunawayNo(); };
+          no.onclick = (e) => { e.preventDefault(); moveRunawayNo(); };
+
+          btnsEl.appendChild(yes);
+          btnsEl.appendChild(no);
+
+          // initial nudge so it doesn't sit still
+          setTimeout(moveRunawayNo, 300);
+        });
+        return;
+      }
+
+      // STEP 5: Final message (your exact text)
+      if (step === 5){
+        animateQuestion(
+          `<span class="success">✅ Операция одобрена! <span class="sparkle">✨</span></span><br><br>` +
+          `Давай <b>потусим (как друзья)</b> <b>14 февраля</b> 😄).<br>` +
+          `Покушаем вместе <b>(не романтически)</b> 🍽️<br>` +
+          `Я куплю тебе <b>цветы (по приколу)</b> 🌸😌<br>` +
+          `И сделаем <b>фотки</b> вместе — на память 📸💞`,
+          () => {
+            btnsEl.innerHTML =
+              `<button class="btn-yes" onclick="step=6; render()">Ок 🥰</button>`;
+          }
+        );
+        return;
+      }
+
+      // STEP 6: End
+      if (step === 6){
+        animateQuestion("Конец миссии 😎💗<br>Увидимся 14-го! 🌸📸", () => {
+          btnsEl.innerHTML =
+            `<button class="btn-no" onclick="location.reload()">Перезапуск 🔁</button>`;
+        });
+        return;
+      }
+    }
+
+    // ----------------------------
+    // Q1 logic
+    // ----------------------------
+    function q1No(){
+      if (q1NoUsed) return;
+      q1NoUsed = true;
+
+      if (loseFlower()) return;
+
+      animateQuestion("😳 Зафиксировано: «Нет»…<br>Минус один 🌸<br><br>Попробуем ещё раз? 🥺", () => {
+        btnsEl.innerHTML =
+          `<button class="btn-yes" onclick="step=2; render()">Ок</button>`;
+      });
+    }
+
+    // ----------------------------
+    // Q2 logic
+    // ----------------------------
+    function q2Yes(){
+      animateQuestion("✅ Позитивная энергия обнаружена! ✨💞", () => {
+        btnsEl.innerHTML =
+          `<button class="btn-yes" onclick="step=4; render()">Дальше 👉</button>`;
+      });
+    }
+
+    function q2No(){
+      if (q2NoUsed) return;
+      q2NoUsed = true;
+
+      if (loseFlower()) return;
+
+      animateQuestion("😅 Отрицательный ответ…<br>Минус один 🌸<br><br>Вернёмся к вопросу? 👉🏻👈🏻", () => {
+        btnsEl.innerHTML =
+          `<button class="btn-yes" onclick="step=3; render()">Вернуться</button>`;
+      });
+    }
+
+    // start
+    setTimeout(() => {
+      updateFlowers();
+      step = 0;
+      render();
+    }, 300);
+  </script>
+</body>
+</html>
