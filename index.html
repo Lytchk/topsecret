@@ -400,7 +400,14 @@
           btnsEl.appendChild(no);
 
           // initial nudge so it doesn't sit still
-          setTimeout(moveRunawayNo, 300);
+          // place NO next to YES at the start
+setTimeout(() => {
+  const yesRect = yes.getBoundingClientRect();
+
+  no.style.left = (yesRect.right + 12) + "px";
+  no.style.top  = (yesRect.top) + "px";
+}, 50);
+
         });
         return;
       }
@@ -477,4 +484,5 @@
   </script>
 </body>
 </html>
+
 
