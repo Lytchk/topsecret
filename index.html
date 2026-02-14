@@ -400,17 +400,7 @@
           btnsEl.appendChild(no);
 
           // initial nudge so it doesn't sit still
-          // place NO next to YES at the start
-setTimeout(() => {
-  const yesRect = yes.getBoundingClientRect();
-
-  no.style.left = (yesRect.right + 12) + "px";
-  no.style.top  = (yesRect.top) + "px";
-}, 50);
-
-        });
-        return;
-      }
+          setTimeout(moveRunawayNo, 300);
 
       // STEP 5: Final message (your exact text)
       if (step === 5){
@@ -484,5 +474,6 @@ setTimeout(() => {
   </script>
 </body>
 </html>
+
 
 
